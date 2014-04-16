@@ -24,12 +24,12 @@ class TestOfBloomFilter extends UnitTestCase {
     
     public function testOfFilterSize1() {
         $b = new BloomFilter(new HashFactory(), $this->prng, 100, .001);
-        $this->assertEqual($b->filterSize(), 1438);
+        $this->assertEqual($b->filterSize(), 1583);
     }
     
     public function testOfFilterSize2() {
         $b = new BloomFilter(new HashFactory(), $this->prng, 200, .001);
-        $this->assertEqual($b->filterSize(), 2876);
+        $this->assertEqual($b->filterSize(), 3165);
     }
     
     public function testOfFilterSize3() {
@@ -39,12 +39,12 @@ class TestOfBloomFilter extends UnitTestCase {
     
     public function testOfHashSize1() {
         $b = new BloomFilter(new HashFactory(), $this->prng, 100, .001);
-        $this->assertEqual($b->hashSize(), 10);
+        $this->assertEqual($b->hashSize(), 11);
     }
     
     public function testOfHashSize2() {
         $b = new BloomFilter(new HashFactory(), $this->prng, 200, .001);
-        $this->assertEqual($b->hashSize(), 10);
+        $this->assertEqual($b->hashSize(), 11);
     }
     
     public function testOfHashSize3() {
@@ -52,35 +52,57 @@ class TestOfBloomFilter extends UnitTestCase {
         $this->assertEqual($b->hashSize(), 13);
     }
     
-    /*public function testOfFalsePositives() {
+    public function testOfFalsePositives1() {
         $_results = array();
         $falsePositives = 0;
+        $n = 10000;
+        $p = .01;
         $hf = new HashFactory();
-        for($i = 0; $i < 1000; ++$i) {
-            $b = new BloomFilter($hf, $this->prng, 1000, .01);
-            for($j = 0; $j < 1000; ++$j) {
+        for($i = 0; $i < 10; ++$i) {
+            $b = new BloomFilter($hf, $this->prng, $n, $p);
+            for($j = 0; $j < $n; ++$j) {
                 $b->add($j * 2);
                 if($b->mayHave($j) && ($j % 2 == 1)) {
                     ++$falsePositives;
                 }
             }
-            // failure should be a 3 standard deviation event
-            //   1000 * .01 + 3*(n*p*(1-p))^.5
-            //echo "\n false positives:  $falsePositives";
-            $_results[] = (int)($falsePositives > 20);
+            // failure should be a 6 standard deviation event
+            $_results[] = (int)($falsePositives > 
+              $n*$p + 6*pow($n*$p*(1-$p), .5));
             $falsePositives = 0;
         }
-        echo "\n failures:  ".count(array_filter($_results))."\n";
-        // failure should be a 6 standard deviation event
-        //   1000 * .01 + 6*(n*p*(1-p))^.5
-        $this->assertEqual(count(array_filter($_results)) < 30, true);
-    }*/
+        // no failure rates in the 6 standard deviation range
+        $this->assertEqual(count(array_filter($_results)) < 1, true);
+    }
+    
+    public function testOfFalsePositives2() {
+        $_results = array();
+        $falsePositives = 0;
+        $n = 1000;
+        $p = .01;
+        $hf = new HashFactory();
+        for($i = 0; $i < 10; ++$i) {
+            $b = new BloomFilter($hf, $this->prng, $n, $p);
+            for($j = 0; $j < $n; ++$j) {
+                $b->add($j * 2);
+                if($b->mayHave($j) && ($j % 2 == 1)) {
+                    ++$falsePositives;
+                }
+            }
+            // failure should be a 6 standard deviation event
+            $_results[] = (int)($falsePositives > 
+              $n*$p + 6*pow($n*$p*(1-$p), .5));
+            $falsePositives = 0;
+        }
+        // no failure rates in the 6 standard deviation range
+        $this->assertEqual(count(array_filter($_results)) < 1, true);
+    }
 }
 
 class testOfHash extends UnitTestCase {
     public function testOfHashFunction() {
         $h = new Hash('test', 5);
-        $this->assertEqual((int)$h->hash(1), 4);
+        $this->assertEqual((int)$h->hash(1), 2);
     }
 }
 

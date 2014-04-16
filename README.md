@@ -1,12 +1,12 @@
 # Incomplete
-* Pass the false positives test
+* Pass testOfFalsePositives2
 * Note limitations on set size and number of hash functions
 
 #### Purpose
 To provide a Bloom Filter data structure where some false positives are tolerable
 
 #### Example
-    $b = new BloomFilter(new HashFactory(), 100, .001);
+    $b = new BloomFilter(new HashFactory(), new PRNG(), 100, .001);
     $this->assertEqual($b->mayHave(1), false);
     $b->add(1);
     $this->assertEqual($b->mayHave(1), true);

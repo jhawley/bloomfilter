@@ -14,7 +14,7 @@ class Hash implements IHash {
     public function hash($content) {
         return bcmod(
           bcadd(
-            number_format(hexdec(md5($this->seed.$content)), 0, '', ''), 0
+            number_format(hexdec(md5($this->seed+$content)), 0, '', ''), 0
           ), $this->size);
     }
 }
