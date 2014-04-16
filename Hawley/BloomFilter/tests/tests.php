@@ -5,10 +5,17 @@ require_once(dirname(dirname(dirname(dirname(__FILE__)))) . '/autoload.php');
 use Hawley\BloomFilter\BloomFilter;
 use Hawley\BloomFilter\Hash;
 use Hawley\BloomFilter\HashFactory;
+use Hawley\BloomFilter\PRNG;
 
-/*class TestOfBloomFilter extends UnitTestCase {    
+class TestOfBloomFilter extends UnitTestCase {  
+    private $prng;
+    
+    public function setUp() {
+        $this->prng = new PRNG();
+    }
+    
     public function testOfDefault() {
-        $b = new BloomFilter(new HashFactory(), 100, .001);
+        $b = new BloomFilter(new HashFactory(), $this->prng, 100, .001);
         $this->assertEqual($b->mayHave(1), false);
         $b->add(1);
         $this->assertEqual($b->mayHave(1), true);
@@ -16,36 +23,59 @@ use Hawley\BloomFilter\HashFactory;
     }
     
     public function testOfFilterSize1() {
-        $b = new BloomFilter(new HashFactory(), 100, .001);
-        $this->assertEqual($b->filterSize(), 701);
+        $b = new BloomFilter(new HashFactory(), $this->prng, 100, .001);
+        $this->assertEqual($b->filterSize(), 1438);
     }
     
     public function testOfFilterSize2() {
-        $b = new BloomFilter(new HashFactory(), 200, .001);
-        $this->assertEqual($b->filterSize(), 1391);
+        $b = new BloomFilter(new HashFactory(), $this->prng, 200, .001);
+        $this->assertEqual($b->filterSize(), 2876);
     }
     
     public function testOfFilterSize3() {
-        $b = new BloomFilter(new HashFactory(), 100, .0001);
-        $this->assertEqual($b->filterSize(), 934);
+        $b = new BloomFilter(new HashFactory(), $this->prng, 100, .0001);
+        $this->assertEqual($b->filterSize(), 1918);
     }
     
-    public function testOfFalsePositives() {
+    public function testOfHashSize1() {
+        $b = new BloomFilter(new HashFactory(), $this->prng, 100, .001);
+        $this->assertEqual($b->hashSize(), 10);
+    }
+    
+    public function testOfHashSize2() {
+        $b = new BloomFilter(new HashFactory(), $this->prng, 200, .001);
+        $this->assertEqual($b->hashSize(), 10);
+    }
+    
+    public function testOfHashSize3() {
+        $b = new BloomFilter(new HashFactory(), $this->prng, 100, .0001);
+        $this->assertEqual($b->hashSize(), 13);
+    }
+    
+    /*public function testOfFalsePositives() {
+        $_results = array();
         $falsePositives = 0;
         $hf = new HashFactory();
-        for($i = 0; $i < 100; ++$i) {
-            $b = new BloomFilter($hf, 100, .001);
-            for($j = 0; $j < 100; ++$j) {
+        for($i = 0; $i < 1000; ++$i) {
+            $b = new BloomFilter($hf, $this->prng, 1000, .01);
+            for($j = 0; $j < 1000; ++$j) {
                 $b->add($j * 2);
                 if($b->mayHave($j) && ($j % 2 == 1)) {
                     ++$falsePositives;
                 }
             }
+            // failure should be a 3 standard deviation event
+            //   1000 * .01 + 3*(n*p*(1-p))^.5
+            //echo "\n false positives:  $falsePositives";
+            $_results[] = (int)($falsePositives > 20);
+            $falsePositives = 0;
         }
-        echo "\n false positives:  $falsePositives \n";
-        $this->assertEqual($falsePositives < 20, true);
-    }
-}*/
+        echo "\n failures:  ".count(array_filter($_results))."\n";
+        // failure should be a 6 standard deviation event
+        //   1000 * .01 + 6*(n*p*(1-p))^.5
+        $this->assertEqual(count(array_filter($_results)) < 30, true);
+    }*/
+}
 
 class testOfHash extends UnitTestCase {
     public function testOfHashFunction() {

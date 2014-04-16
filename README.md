@@ -1,7 +1,6 @@
 # Incomplete
-* The number of hash function and the filter size need to be calculated independently.
-* testOfFalsePositives needs to be revisited in a more rigorous manner.
-* The hash class needs to be tested more rigorously
+* Pass the false positives test
+* Note limitations on set size and number of hash functions
 
 #### Purpose
 To provide a Bloom Filter data structure where some false positives are tolerable
@@ -14,7 +13,10 @@ To provide a Bloom Filter data structure where some false positives are tolerabl
     $this->assertEqual($b->mayHave(2), false); //very small probability of failure
 
 #### Installation
-The autoload.php file requires a version of PHP that supports lambda expressions.  The hash class requires the BCMath Arbitrary Precision extension (http://www.php.net/manual/en/book.bc.php).
+Requires PHP 5.3.0 (for anonymous functions).  The hash class requires the BCMath Arbitrary Precision extension (http://www.php.net/manual/en/book.bc.php).
 
 #### License
 Public domain without warranties
+
+#### Misc Notes
+Rounding appears to have a significant impact on the number of hash functions used (e.g. using 3 vs 4 on a set size of 1000 and a filter size of 2000).   
