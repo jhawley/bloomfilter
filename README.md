@@ -17,6 +17,3 @@ Requires PHP 5.3.0 (for anonymous functions).  The hash class requires the BCMat
 
 #### License
 Public domain without warranties
-
-#### Misc Notes
-Rounding appears to have a significant impact on the number of hash functions used (e.g. using 3 vs 4 on a set size of 1000 and a filter size of 2000).   
