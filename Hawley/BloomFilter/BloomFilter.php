@@ -3,8 +3,8 @@
 namespace Hawley\BloomFilter;
 
 class BloomFilter implements IBloomFilter {
-    private $_hashes = array();
-    private $_filter = array();
+    protected $_hashes = array();
+    protected $_filter = array();
     
     public function __construct(IHashFactory $hf, IPRNG $prng, $setSize, 
       $errorChance) {
@@ -36,6 +36,7 @@ class BloomFilter implements IBloomFilter {
         for($i = 0; $i < $filterSizeNeeded; ++$i) {
             $this->_filter[] = 0;
         }
+        $this->setSize = $setSize;
     }
     
     private function testProbability($setSize, $filterSize, $hashSize) {

@@ -6,6 +6,7 @@ use Hawley\BloomFilter\BloomFilter;
 use Hawley\BloomFilter\Hash;
 use Hawley\BloomFilter\HashFactory;
 use Hawley\BloomFilter\PRNG;
+use Hawley\BloomFilter\StableBloomFilter;
 
 class TestOfBloomFilter extends UnitTestCase {  
     private $prng;
@@ -34,10 +35,10 @@ class TestOfBloomFilter extends UnitTestCase {
         $this->assertEqual($this->makeFilter(100, .0001)->hashSize(), 13);
     }
     
-    public function testOfFalsePositives() {
+    /*public function testOfFalsePositives() {
         $this->assertEqual($this->falsePositivesTest(10000, .01), true);
         $this->assertEqual($this->falsePositivesTest(1000, .01), true);
-    }
+    }*/
     
     private function makeFilter($setSize, $errorProbability) {
         return new BloomFilter(new HashFactory(), $this->prng, $setSize, 
@@ -63,6 +64,46 @@ class TestOfBloomFilter extends UnitTestCase {
         }
         // no failure rates in the 6 standard deviation range
         return (count(array_filter($_results)) < 1);
+    }
+}
+
+class testOfStableBloomFilter extends UnitTestCase {
+    private $prng;
+    
+    public function setUp() {
+        $this->prng = new PRNG();
+    }
+    
+    public function testOfDefault() {
+        $b = $this->makeFilter(100, .001);
+        $this->assertEqual($b->mayHave(1), false);
+        $b->add(1);
+        $this->assertEqual($b->mayHave(1), true);
+        $this->assertEqual($b->mayHave(2), false);
+    }
+    
+    public function testOfStability1() {
+        $b = $this->makeFilter(1, .001);
+        $this->assertEqual($b->mayHave(1), false);
+        $b->add(1);
+        $this->assertEqual($b->mayHave(1), true);
+        $b->add(2);
+        $this->assertEqual($b->mayHave(2), true);
+        $this->assertEqual($b->mayHave(1), false);
+    }
+    
+    public function testOfStability2() {
+        $b = $this->makeFilter(999, .001);
+        for($counter = 1; $counter < 1001; $counter++) {
+            $b->add($counter);
+        }
+        $this->assertEqual($b->mayHave(1), false);
+        $this->assertEqual($b->mayHave(1000), true);
+    }
+    
+    private function makeFilter($setSize, $errorProbability) {
+        return new StableBloomFilter(new HashFactory(), $this->prng, $setSize, 
+          $errorProbability);
     }
 }
 
