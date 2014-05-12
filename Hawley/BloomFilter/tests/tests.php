@@ -2,13 +2,13 @@
 require_once(dirname(__FILE__) . '/simpletest/autorun.php');
 require_once(dirname(dirname(dirname(dirname(__FILE__)))) . '/autoload.php');
 
-use Hawley\BloomFilter\BloomFilter;
+use Hawley\BloomFilter\SimpleBloomFilter as BloomFilter;
 use Hawley\BloomFilter\Hash;
 use Hawley\BloomFilter\HashFactory;
 use Hawley\BloomFilter\PRNG;
 use Hawley\BloomFilter\StableBloomFilter;
 
-class TestOfBloomFilter extends UnitTestCase {  
+class TestOfSimpleBloomFilter extends UnitTestCase {  
     private $prng;
     
     public function setUp() {

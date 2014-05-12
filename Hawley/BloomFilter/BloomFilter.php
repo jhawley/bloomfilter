@@ -2,7 +2,7 @@
 
 namespace Hawley\BloomFilter;
 
-class BloomFilter implements IBloomFilter {
+abstract class BloomFilter implements IBloomFilter {
     protected $_hashes = array();
     protected $_filter = array();
     
@@ -59,18 +59,7 @@ class BloomFilter implements IBloomFilter {
         return count($this->_hashes);
     }
     
-    public function add($item) {
-        foreach($this->_hashes as $hash) {
-            $this->_filter[$hash->hash($item)] = 1;
-        }
-    }
+    abstract public function add($item);
     
-    public function mayHave($item) {
-        foreach($this->_hashes as $hash) {
-            if(!$this->_filter[$hash->hash($item)]) {
-                return false;
-            }
-        }
-        return true;
-    }
+    abstract public function mayHave($item);
 }
