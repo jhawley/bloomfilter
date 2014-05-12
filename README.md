@@ -6,7 +6,7 @@
 To provide a Bloom Filter data structure where some false positives are tolerable
 
 #### Example
-    $b = new BloomFilter(new HashFactory(), new PRNG(), 100, .001);
+    $b = new SimpleBloomFilter(new HashFactory(), new PRNG(), 100, .001);
     $this->assertEqual($b->mayHave(1), false);
     $b->add(1);
     $this->assertEqual($b->mayHave(1), true);
