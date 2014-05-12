@@ -7,6 +7,8 @@ use Hawley\BloomFilter\Hash;
 use Hawley\BloomFilter\HashFactory;
 use Hawley\BloomFilter\PRNG;
 use Hawley\BloomFilter\StableBloomFilter;
+use Hawley\BloomFilter\RemovalBloomFilter;
+use Hawley\BloomFilter\BloomFactory;
 
 class TestOfSimpleBloomFilter extends UnitTestCase {  
     private $prng;
@@ -35,10 +37,10 @@ class TestOfSimpleBloomFilter extends UnitTestCase {
         $this->assertEqual($this->makeFilter(100, .0001)->hashSize(), 13);
     }
     
-    /*public function testOfFalsePositives() {
+    public function testOfFalsePositives() {
         $this->assertEqual($this->falsePositivesTest(10000, .01), true);
-        $this->assertEqual($this->falsePositivesTest(1000, .01), true);
-    }*/
+        //$this->assertEqual($this->falsePositivesTest(1000, .01), true);
+    }
     
     private function makeFilter($setSize, $errorProbability) {
         return new BloomFilter(new HashFactory(), $this->prng, $setSize, 
@@ -104,6 +106,41 @@ class testOfStableBloomFilter extends UnitTestCase {
     private function makeFilter($setSize, $errorProbability) {
         return new StableBloomFilter(new HashFactory(), $this->prng, $setSize, 
           $errorProbability);
+    }
+}
+
+class testOfRemovalBloomFilter extends UnitTestCase {
+    private $prng;
+    
+    public function setUp() {
+        $this->prng = new PRNG();
+    }
+    
+    private function makeFilter($setSize, $errorProbability) {
+        return new RemovalBloomFilter(new HashFactory(), $this->prng, $setSize, 
+          $errorProbability, new BloomFactory());
+    }
+    
+    public function testOfDefault() {
+        $b = $this->makeFilter(100, .001);
+        $this->assertEqual($b->mayHave(1), false);
+        $b->add(1);
+        $this->assertEqual($b->mayHave(1), true);
+        $this->assertEqual($b->mayHave(2), false);
+    }
+    
+    public function testOfRemoval() {
+        $b = $this->makeFilter(100, .001);
+        $b->add(1);
+        $this->assertEqual($b->mayHave(1), true);
+        $b->remove(1);
+        $this->assertEqual($b->mayHave(1), false);
+    }
+    
+    public function testOfBadRemoval() {
+        $b = $this->makeFilter(100, .001);
+        $this->expectException();
+        $b->remove(1);
     }
 }
 
