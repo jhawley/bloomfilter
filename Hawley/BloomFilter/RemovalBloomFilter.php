@@ -8,16 +8,18 @@ class RemovalBloomFilter implements IRemovalBloomFilter {
     protected $removalFilter;
     
     public function __construct(IHashFactory $hf, IPRNG $prng, $setSize, 
-      $errorChance, IBloomFactory $bf) {
+      $errorChance, IBloomFilterStrategy $bfs, IBloomFactory $bf) {
         $p = 1;
         $newErrorChance = $errorChance;
         $_seeds = array();
-        $this->removalFilter = $bf->create($hf, $prng, $setSize, $errorChance);
+        $this->removalFilter = $bf->create($hf, $prng, $setSize, $errorChance,
+          $bfs);
         // unchecked rounding can cause the expected error rate to exceed the 
         //   specified expected error rate
         while($p > $errorChance) {
-            $filterSizeNeeded = $this->filterSizeNeeded($newErrorChance, $setSize);
-            $hashesFunctionCount = $this->hashesNeeded($newErrorChance, $setSize, 
+            $filterSizeNeeded = $bfs->filterSizeNeeded($newErrorChance, 
+              $setSize);
+            $hashesFunctionCount = $bfs->hashesNeeded($setSize, 
               $filterSizeNeeded);
             $p = $this->testProbability($setSize, $filterSizeNeeded, 
               $hashesFunctionCount);
@@ -43,14 +45,6 @@ class RemovalBloomFilter implements IRemovalBloomFilter {
     
     private function testProbability($setSize, $filterSize, $hashSize) {
         return pow(1 - pow(1 - (1/$filterSize), $setSize * $hashSize), $hashSize);
-    }
-    
-    private function hashesNeeded($errorChance, $setSize, $filterSize) {
-        return round($filterSize * log(2) / $setSize);
-    }
-    
-    private function filterSizeNeeded($errorChance, $setSize) {
-        return ceil(-$setSize * (log($errorChance)) / pow(log(2),2));
     }
     
     public function filterSize() {

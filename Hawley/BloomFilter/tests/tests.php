@@ -9,12 +9,30 @@ use Hawley\BloomFilter\PRNG;
 use Hawley\BloomFilter\StableBloomFilter;
 use Hawley\BloomFilter\RemovalBloomFilter;
 use Hawley\BloomFilter\BloomFactory;
+use Hawley\BloomFilter\MemoryStrategy;
+use Hawley\BloomFilter\LoadStrategy;
+
+class TestOfStrategies extends UnitTestCase {
+    public function testOfMemory() {
+        $m = new MemoryStrategy();
+        $this->assertEqual($m->filterSizeNeeded(.001, 100), 1438);
+        $this->assertEqual($m->hashesNeeded(100, 1438), 10);
+    }
+    
+    public function testOfLoad() {
+        $m = new LoadStrategy();
+        $this->assertEqual($m->filterSizeNeeded(.001, 100), 100000);
+        $this->assertEqual($m->hashesNeeded(100, 100000), 1);
+    }
+}
 
 class TestOfSimpleBloomFilter extends UnitTestCase {  
-    private $prng;
+    protected $prng;
+    protected $strategy;
     
     public function setUp() {
         $this->prng = new PRNG();
+        $this->strategy = new MemoryStrategy();
     }
     
     public function testOfDefault() {
@@ -37,17 +55,17 @@ class TestOfSimpleBloomFilter extends UnitTestCase {
         $this->assertEqual($this->makeFilter(100, .0001)->hashSize(), 13);
     }
     
-    public function testOfFalsePositives() {
+    /*public function testOfFalsePositives() {
         $this->assertEqual($this->falsePositivesTest(10000, .01), true);
         //$this->assertEqual($this->falsePositivesTest(1000, .01), true);
-    }
+    }*/
     
-    private function makeFilter($setSize, $errorProbability) {
+    protected function makeFilter($setSize, $errorProbability) {
         return new BloomFilter(new HashFactory(), $this->prng, $setSize, 
-          $errorProbability);
+          $errorProbability, $this->strategy);
     }
     
-    private function falsePositivesTest($n, $p) {
+    protected function falsePositivesTest($n, $p) {
         $_results = array();
         $falsePositives = 0;
         $hf = new HashFactory();
@@ -69,21 +87,7 @@ class TestOfSimpleBloomFilter extends UnitTestCase {
     }
 }
 
-class testOfStableBloomFilter extends UnitTestCase {
-    private $prng;
-    
-    public function setUp() {
-        $this->prng = new PRNG();
-    }
-    
-    public function testOfDefault() {
-        $b = $this->makeFilter(100, .001);
-        $this->assertEqual($b->mayHave(1), false);
-        $b->add(1);
-        $this->assertEqual($b->mayHave(1), true);
-        $this->assertEqual($b->mayHave(2), false);
-    }
-    
+class testOfStableBloomFilter extends TestOfSimpleBloomFilter {    
     public function testOfStability1() {
         $b = $this->makeFilter(1, .001);
         $this->assertEqual($b->mayHave(1), false);
@@ -103,30 +107,16 @@ class testOfStableBloomFilter extends UnitTestCase {
         $this->assertEqual($b->mayHave(1000), true);
     }
     
-    private function makeFilter($setSize, $errorProbability) {
+    protected function makeFilter($setSize, $errorProbability) {
         return new StableBloomFilter(new HashFactory(), $this->prng, $setSize, 
-          $errorProbability);
+          $errorProbability, $this->strategy);
     }
 }
 
-class testOfRemovalBloomFilter extends UnitTestCase {
-    private $prng;
-    
-    public function setUp() {
-        $this->prng = new PRNG();
-    }
-    
-    private function makeFilter($setSize, $errorProbability) {
+class testOfRemovalBloomFilter extends TestOfSimpleBloomFilter {    
+    protected function makeFilter($setSize, $errorProbability) {
         return new RemovalBloomFilter(new HashFactory(), $this->prng, $setSize, 
-          $errorProbability, new BloomFactory());
-    }
-    
-    public function testOfDefault() {
-        $b = $this->makeFilter(100, .001);
-        $this->assertEqual($b->mayHave(1), false);
-        $b->add(1);
-        $this->assertEqual($b->mayHave(1), true);
-        $this->assertEqual($b->mayHave(2), false);
+          $errorProbability, $this->strategy, new BloomFactory());
     }
     
     public function testOfRemoval() {
