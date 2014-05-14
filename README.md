@@ -1,7 +1,6 @@
 # Incomplete
 * Pass testOfFalsePositives2
 * Note limitations on set size and number of hash functions
-* Throw an exception upon adding an excessive number of elements
 * Add comments to classes / methods
 
 #### Purpose
