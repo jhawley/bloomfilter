@@ -5,6 +5,8 @@ namespace Hawley\BloomFilter;
 abstract class BloomFilter implements IBloomFilter {
     protected $_hashes = array();
     protected $_filter = array();
+    protected $setSize;
+    protected $itemsHeld = 0;
     
     public function __construct(IHashFactory $hf, IPRNG $prng, $setSize, 
       $errorChance, IBloomFilterStrategy $bfs) {

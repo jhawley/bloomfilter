@@ -5,7 +5,8 @@ namespace Hawley\BloomFilter;
 class RemovalBloomFilter implements IRemovalBloomFilter {
     protected $_hashes = array();
     protected $_filter = array();
-    protected $removalFilter;
+    protected $removalFilter, $setSize;
+    protected $itemsHeld = 0;
     
     public function __construct(IHashFactory $hf, IPRNG $prng, $setSize, 
       $errorChance, IBloomFilterStrategy $bfs, IBloomFactory $bf) {
@@ -56,6 +57,10 @@ class RemovalBloomFilter implements IRemovalBloomFilter {
     }
     
     public function add($item) {
+        if($this->itemsHeld >= $this->setSize) {
+            throw new \Exception("Set size exceeded!");
+        }
+        $this->itemsHeld++;
         foreach($this->_hashes as $hash) {
             $this->_filter[$hash->hash($item)] = 1;
         }

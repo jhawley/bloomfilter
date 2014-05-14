@@ -26,7 +26,7 @@ class TestOfStrategies extends UnitTestCase {
     }
 }
 
-class TestOfSimpleBloomFilter extends UnitTestCase {  
+class TestOfBloomFilter extends UnitTestCase {  
     protected $prng;
     protected $strategy;
     
@@ -87,7 +87,19 @@ class TestOfSimpleBloomFilter extends UnitTestCase {
     }
 }
 
-class testOfStableBloomFilter extends TestOfSimpleBloomFilter {    
+class TestOfSimpleBloomFilter extends TestOfBloomFilter {
+    public function testOfSetSizeLimit() {
+        $limit = 50;
+        $b = $this->makeFilter($limit, .001);
+        for($i = 0; $i < $limit; ++$i) {
+            $b->add($i);
+        }
+        $this->expectException();
+        $b->add($limit+1);
+    }
+}
+
+class testOfStableBloomFilter extends TestOfBloomFilter {    
     public function testOfStability1() {
         $b = $this->makeFilter(1, .001);
         $this->assertEqual($b->mayHave(1), false);
